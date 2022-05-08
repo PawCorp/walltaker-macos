@@ -6,7 +6,6 @@ class Walltaker {
     var linkId: Int = 0
 
     func run() async {
-        print("d")
         linkId = askLinkID()
         print("Starting link-pinging for ID " + String(linkId))
         while true {
@@ -57,11 +56,9 @@ class Walltaker {
         }
     }
 }
-print("a")
+
 if #available(macOS 10.15, *) {
-    print("b")
     Task {
-        print("c")
         let app = Walltaker()
         await app.run()
     }
