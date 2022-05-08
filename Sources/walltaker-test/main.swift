@@ -7,22 +7,30 @@ func failAsBadMacOSVersion() {
 
 @available(macOS 10.15.0, *)
 class Walltaker {
-    let wallpaper = Wallpaper()
+    let wallpaper: Wallpaper
+    let screen = Screen()
     var linkId: Int = 0
 
+    init() {
+        wallpaper = Wallpaper(screen: screen)
+    }
+
     func run() async {
+        print("\u{001B}[2J") // Clear screen
         linkId = askLinkID()
-        print("Starting link-pinging for ID " + String(linkId))
+        screen.run()
+        present()
+        screen.setLinkId(linkId: linkId)
         while true {
             guard let link = await fetchLink() else {
-                print("Link fetch failed... trying again.")
+                screen.appendToMainArea(content: "Link fetch failed... trying again.")
                 return
             }
 
             do {
                 try wallpaper.update(link: link)
             } catch {
-                print("Wallpaper setting failed... trying again.", error.localizedDescription)
+                screen.appendToMainArea(content: "Wallpaper setting failed... trying again.")
             }
 
             sleep(10)
@@ -30,8 +38,7 @@ class Walltaker {
     }
 
     private func present() {
-        print("Walltaker - MacOS Beta Client")
-        print("-----------------------------")
+        screen.appendToMainArea(content: "Walltaker - MacOS Beta Client")
     }
 
     private func askLinkID() -> Int {
@@ -56,7 +63,7 @@ class Walltaker {
                 return nil
             }
         } catch {
-            print(error.localizedDescription)
+            screen.appendToMainArea(content: error.localizedDescription)
             return nil
         }
     }

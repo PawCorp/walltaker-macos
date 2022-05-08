@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "termbox",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/dduan/Termbox.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "9960082c5b59805ba2ad8e272620ef8c5f58daa9"
+      }
+    }
+  ],
+  "version" : 2
+}

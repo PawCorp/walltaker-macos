@@ -3,10 +3,12 @@ import Cocoa
 
 class Wallpaper {
     var lastPostUrl: URL? = nil
-    let screen: NSScreen
+    let mainMonitor: NSScreen
+    let screen: Screen
 
-    init() {
-        screen = NSScreen.main!
+    init(screen: Screen) {
+        self.screen = screen
+        mainMonitor = NSScreen.main!
     }
 
     func update(link: Link) throws {
@@ -18,6 +20,7 @@ class Wallpaper {
         if (newPostUrl != lastPostUrl) {
             printWithTimestamp(msg: "New post from " + link.setBy)
             lastPostUrl = newPostUrl
+            screen.setLink(link: link)
 
             let tempFilePath = try getTempFilePath()
             try downloadImageTo(sourceURL: newPostUrl, destinationURL: tempFilePath)
@@ -28,7 +31,7 @@ class Wallpaper {
     }
 
     private func applyWallpaper(url: URL) throws {
-        try NSWorkspace.shared.setDesktopImageURL(url, for: screen, options: [:])
+        try NSWorkspace.shared.setDesktopImageURL(url, for: mainMonitor, options: [:])
         printWithTimestamp(msg: "  | 4/4 - Wallpaper set!")
     }
 
@@ -52,7 +55,7 @@ class Wallpaper {
     private func printWithTimestamp(msg: String) {
         let timestamp = NSDate().timeIntervalSince1970.rounded()
 
-        print(String(timestamp) + " - " + msg)
+        screen.appendToMainArea(content: String(timestamp) + " - " + msg)
     }
 
 }
