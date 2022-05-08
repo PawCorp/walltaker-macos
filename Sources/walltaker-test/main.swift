@@ -1,5 +1,10 @@
 import Foundation
 
+func failAsBadMacOSVersion() {
+    print("Sorry bitch, can't work on this version of MacOS.")
+    exit(0)
+}
+
 @available(macOS 10.15.0, *)
 class Walltaker {
     let wallpaper = Wallpaper()
@@ -43,12 +48,12 @@ class Walltaker {
         do {
             let url = URL(string: "https://walltaker.joi.how/api/links/" + String(linkId) + ".json")!
             if #available(macOS 12.0, *) {
-                let (data, response) = try await URLSession.shared.data(from: url)
+                let (data, _) = try await URLSession.shared.data(from: url)
 
                 return try linkFactory(data: data)
             } else {
-                print("Sorry bitch, can't work on this version of MacOS")
-                exit(0)
+                failAsBadMacOSVersion();
+                return nil
             }
         } catch {
             print(error.localizedDescription)
@@ -63,8 +68,7 @@ if #available(macOS 10.15, *) {
         await app.run()
     }
 } else {
-    print("Sorry bitch, can't work on this version of MacOS")
-    exit(0)
+    failAsBadMacOSVersion()
 }
 
 while RunLoop.main.run(mode: .default, before: .distantFuture) {}
