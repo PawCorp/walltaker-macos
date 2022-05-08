@@ -1,42 +1,73 @@
 import Foundation
 
-let wallpaper = Wallpaper()
+@available(macOS 10.15.0, *)
+class Walltaker {
+    let wallpaper = Wallpaper()
+    var linkId: Int = 0
 
-func getLink(id: Int) {
-    let url = URL(string: "https://walltaker.joi.how/api/links/" + String(id) + ".json")!
+    func run() async {
+        print("d")
+        linkId = askLinkID()
+        print("Starting link-pinging for ID " + String(linkId))
+        while true {
+            guard let link = await fetchLink() else {
+                print("Link fetch failed... trying again.")
+                return
+            }
 
-    let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
-        if (error != nil) {
-            print(error?.localizedDescription as Any)
-            return
+            do {
+                try wallpaper.update(link: link)
+            } catch {
+                print("Wallpaper setting failed... trying again.", error.localizedDescription)
+            }
+
+            sleep(10)
         }
+    }
 
+    private func present() {
+        print("Walltaker - MacOS Beta Client")
+        print("-----------------------------")
+    }
+
+    private func askLinkID() -> Int {
+        print("Enter your link ID:")
+        if let selectedLinkId = Int(readLine()!) {
+            return selectedLinkId
+        } else {
+            print("That's not a link ID! You are looking for a number. It's the last number in the URL for your link.\n")
+            return askLinkID()
+        }
+    }
+
+    private func fetchLink() async -> Link? {
         do {
-            // Turn JSON into a Link...
-            let link = try linkFactory(data: data!)
+            let url = URL(string: "https://walltaker.joi.how/api/links/" + String(linkId) + ".json")!
+            if #available(macOS 12.0, *) {
+                let (data, response) = try await URLSession.shared.data(from: url)
 
-            // ...set wallpaper to new Link
-            try wallpaper.update(link: link)
+                return try linkFactory(data: data)
+            } else {
+                print("Sorry bitch, can't work on this version of MacOS")
+                exit(0)
+            }
         } catch {
             print(error.localizedDescription)
+            return nil
         }
     }
-
-    task.resume()
 }
-
-print("Walltaker - MacOS Beta Client")
-print("-----------------------------")
-print("Enter your link ID:")
-
-if let linkId = Int(readLine()!) {
-    print("Starting link-pinging for ID " + String(linkId))
-
-    while RunLoop.main.run(mode: .default, before: .distantFuture) {
-        getLink(id: linkId)
-        sleep(10)
+print("a")
+if #available(macOS 10.15, *) {
+    print("b")
+    Task {
+        print("c")
+        let app = Walltaker()
+        await app.run()
     }
 } else {
-    print("Quitting, that's not a link ID.")
+    print("Sorry bitch, can't work on this version of MacOS")
     exit(0)
 }
+
+while RunLoop.main.run(mode: .default, before: .distantFuture) {}
