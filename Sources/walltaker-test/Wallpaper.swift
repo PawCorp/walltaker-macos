@@ -18,7 +18,7 @@ class Wallpaper {
         }
 
         if (newPostUrl != lastPostUrl) {
-            printWithTimestamp(msg: "New post from " + link.setBy)
+            printWithTimestamp(msg: "⚠ New post from " + link.setBy)
             lastPostUrl = newPostUrl
             screen.setLink(link: link)
 

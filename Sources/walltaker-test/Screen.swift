@@ -45,7 +45,7 @@ class Screen {
     }
 
     private func refreshStatusBar() {
-        var content = "Press q to exit █ ID: \(linkId) █ From: \(link?.setBy ?? "???")"
+        var content = " ID: \(linkId) █ From: \(link?.setBy ?? "???")"
         if #available(macOS 12, *) {
             let time = link?.updatedAt.formatted()
             content += " at \(time ?? "???")"
@@ -54,13 +54,14 @@ class Screen {
     }
 
     private func setStatusBar(content: String) {
+        let rightSide = "█ Press q to exit "
         let lastY = Termbox.height - 1
-        let trimmedContent = content.prefix(Int(Termbox.width))
+        let trimmedContent = content.prefix(Int(Termbox.width) - rightSide.count)
         let filler = String(
                 repeating: " ",
-                count: Int(Termbox.width) - trimmedContent.unicodeScalars.count
+                count: Int(Termbox.width) - trimmedContent.unicodeScalars.count - rightSide.count
         )
-        printAt(x: 0, y: lastY, text: trimmedContent + filler,
+        printAt(x: 0, y: lastY, text: trimmedContent + filler + rightSide,
                 foreground: .black, background: .yellow)
 
         Termbox.present()
@@ -102,9 +103,19 @@ class Screen {
                          background: Attributes = .default) {
         let border = Termbox.width
 
+        var foregroundColour = foreground
+
         for (c, xi) in zip(text.unicodeScalars, x..<border) {
+            if (c == "█") {
+                Termbox.put(x: xi, y: y, character: " ",
+                        foreground: .default, background: .default)
+                continue
+            }
+            if (c == "⚠") {
+                foregroundColour = .red
+            }
             Termbox.put(x: xi, y: y, character: c,
-                    foreground: foreground, background: background)
+                    foreground: foregroundColour, background: background)
         }
     }
 
